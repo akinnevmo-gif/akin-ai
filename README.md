@@ -18,3 +18,9 @@ It combines the power of **OpenAI GPT models** with extra features like voice ch
 ---
 
 ## 🏗️ Project Structure
+
+akin-ai/
+ ├── public/
+ │    └── index.html   ← Frontend (UI)
+ ├── server.js         ← Node.js backend
+ ├── package.json      ← Dependencies
