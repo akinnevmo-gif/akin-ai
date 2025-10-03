@@ -1,7 +1,7 @@
 {
   "name": "akin-ai",
   "version": "1.0.0",
-  "description": "Akin AI - Advanced Chatbot powered by OpenAI (2025)",
+  "description": "Akin AI - Advanced chatbot 2025",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
