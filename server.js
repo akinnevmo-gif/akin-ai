@@ -1,54 +1,41 @@
-import express from "express";
-import bodyParser from "body-parser";
-import fetch from "node-fetch";
-import path from "path";
-import { fileURLToPath } from "url";
+const express = require("express");
+const bodyParser = require("body-parser");
+const { OpenAI } = require("openai");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 app.use(bodyParser.json());
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname)));
 
 // Chat endpoint
 app.post("/chat", async (req, res) => {
-  const { message } = req.body;
-
   try {
-    // 🔗 Simple plugin example: Weather
-    if (message.toLowerCase().includes("weather")) {
-      const fakeWeather = "Sunny, 29°C in Lagos 🌞";
-      return res.json({ reply: `According to my nano-banana 🌐: ${fakeWeather}` });
-    }
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ error: "No message provided" });
 
-    // 🔗 Call OpenAI
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",  // 2025 upgrade 🚀
-        messages: [{ role: "user", content: message }],
-        stream: false
-      })
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: message }],
     });
 
-    const data = await response.json();
-
-    if (data.error) {
-      return res.status(500).json({ reply: "Error: " + data.error.message });
-    }
-
-    const reply = data.choices[0].message.content;
-    res.json({ reply });
-  } catch (err) {
-    res.status(500).json({ reply: "Something went wrong 🤖🍌" });
+    res.json({ reply: response.choices[0].message.content });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "AI request failed" });
   }
 });
 
-app.listen(PORT, () => console.log(`✅ Akin AI running on port ${PORT}`));
+// Serve index.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Akin AI running at http://localhost:${PORT}`);
+});
